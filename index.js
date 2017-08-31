@@ -113,133 +113,162 @@ function manager (){
     name:"app",
     message: "Please enter the number associated with the options"
   }]).then(function(answers){
-    if(answers.app == 1){
-      connection.query(
-        'select * from products',
-        function(error, results, fields){
-          if(error) throw error;
-          var t = new Table({
-            borderStyle:2
-          });
 
-          // console.log(results.length);
-
-          t.push(["Item ID".blue, "Product".blue, "Price".blue, "Qty in Stock".blue],
-          ["---------","----------","---------","---------"]);
-
-          for(var i = 0; i < results.length; i++){
-            t.push(
-              [results[i].item_id, results[i].product_name, results[i].price,results[i].stock_quantity]
-            )
-          }
-
-          console.log("" + t);
-
-        manager();
-
-      });
-    } else if(answers.app == 2){
-      connection.query(
-        'select * from products where stock_quantity<=5',
-        function(error, results, fields){
-          if(error) throw error;
-          var t = new Table({
-            borderStyle:2
-          });
-
-          // console.log(results.length);
-
-          t.push(["---------","Low Stock","---------"],
-            ["Item ID".blue, "Product".blue, "Price".blue, "Qty in Stock".blue],
-          ["---------","----------","---------","---------"]);
-
-          for(var i = 0; i < results.length; i++){
-            t.push(
-              [results[i].item_id, results[i].product_name, results[i].price,results[i].stock_quantity]
-            )
-          }
-
-          console.log("" + t);
-          manager();
-        }
-      );
-
-    } else if (answers.app == 3){
-      inquirer.prompt([{
-        name:"id",
-        message:"Please Enter Id for item you would like to Add"
-      }]).then(function(answers){
-        connection.query('select * from products where item_id =' +
-        answers.id ,
-        function(error, results, fields){
-          if(error) throw error;
-
-          inquirer.prompt([{
-            name:'qty',
-            message: "How many would you like to add to inventory"
-          }]).then(function(answers){
-            var itemPrimary = results[0].item_id;
-            var total = parseInt(results[0].stock_quantity) + parseInt(answers.qty);
-            var totalRev = parseInt(results[0].product_sales) + parseInt(total);
-
-
-            connection.query('update products set stock_quantity =' + total + ", product_sales ="+ totalRev +" where item_id=" + results[0].item_id,
-              function(error, results, fields){
-
-                connection.query(
-                  'select * from products where item_id=' + itemPrimary,
-                  function(error, results, fields){
-                    if(error) throw error;
-
-                    manager();
-
-                  }
-              );
-            });
-          });
-        }
-      )
-      });
-    } else if(answers.app == 4){
-      var newProduct = {};
-      inquirer.prompt([{
-        name:'name',
-        message: 'Please Enter Product Name'
-      },{
-        name:'dep',
-        message: 'Please Enter Department Name'
-      },{
-        name:'price',
-        message:'Price of new Product'
-      },{
-        name:'qty',
-        message:'How many will you like to add to inventory'
-      }]).then(function(answers){
-        newProduct.product_name = answers.name;
-        newProduct.department_name = answers.dep;
-        newProduct.price = answers.price;
-        newProduct.stock_quantity = answers.qty;
-        connection.query(
-          'insert into products set ?', newProduct,
-          function(error, results, fields){
-            if (error) throw error;
-            console.log(results);
-            manager();
-          }
-        )
-      });
-    } else if (answers.app == 5){
-      supervisor();
-    } else if (answers.app == 6){
-      connection.end(function(err) {
-        if (err) throw error;
-        // The connection is terminated now
-        console.log("Connection Terminated");
-      });
+    switch(answers.app){
+      case "1":
+        viewProductsForSale();
+        break;
+      case "2":
+        viewLowInventory();
+        break;
+      case "3":
+        addInventory();
+        break;
+      case "4":
+        addNewProduct();
+        break;
+      case "5":
+        supervisor();
+        break;
+      case "6":
+        exitProgram();
+        break;
     }
   });
 }
 
+function viewProductsForSale(){
+  connection.query(
+    'select * from products',
+    function(error, results, fields){
+      if(error) throw error;
+      var t = new Table({
+        borderStyle:2
+      });
+
+      // console.log(results.length);
+
+      t.push(["Item ID".blue, "Product".blue, "Price".blue, "Qty in Stock".blue],
+      ["---------","----------","---------","---------"]);
+
+      for(var i = 0; i < results.length; i++){
+        t.push(
+          [results[i].item_id, results[i].product_name, results[i].price,results[i].stock_quantity]
+        )
+      }
+
+      console.log("" + t);
+
+    manager();
+
+  });
+}
+
+function viewLowInventory(){
+  connection.query(
+    'select * from products where stock_quantity<=5',
+    function(error, results, fields){
+      if(error) throw error;
+      var t = new Table({
+        borderStyle:2
+      });
+
+      // console.log(results.length);
+
+      t.push(["---------","Low Stock","---------"],
+        ["Item ID".blue, "Product".blue, "Price".blue, "Qty in Stock".blue],
+      ["---------","----------","---------","---------"]);
+
+      for(var i = 0; i < results.length; i++){
+        t.push(
+          [results[i].item_id, results[i].product_name, results[i].price,results[i].stock_quantity]
+        )
+      }
+
+      console.log("" + t);
+      manager();
+    }
+  );
+
+
+
+}
+
+function addInventory(){
+  inquirer.prompt([{
+    name:"id",
+    message:"Please Enter Id for item you would like to Add"
+  }]).then(function(answers){
+    connection.query('select * from products where item_id =' +
+    answers.id ,
+    function(error, results, fields){
+      if(error) throw error;
+
+      inquirer.prompt([{
+        name:'qty',
+        message: "How many would you like to add to inventory"
+      }]).then(function(answers){
+        var itemPrimary = results[0].item_id;
+        var total = parseInt(results[0].stock_quantity) + parseInt(answers.qty);
+        var totalRev = parseInt(results[0].product_sales) + parseInt(total);
+
+
+        connection.query('update products set stock_quantity =' + total + ", product_sales ="+ totalRev +" where item_id=" + results[0].item_id,
+          function(error, results, fields){
+
+            connection.query(
+              'select * from products where item_id=' + itemPrimary,
+              function(error, results, fields){
+                if(error) throw error;
+
+                manager();
+
+              }
+          );
+        });
+      });
+    }
+  )
+  });
+}
+
+function addNewProduct(){
+  var newProduct = {};
+  inquirer.prompt([{
+    name:'name',
+    message: 'Please Enter Product Name'
+  },{
+    name:'dep',
+    message: 'Please Enter Department Name'
+  },{
+    name:'price',
+    message:'Price of new Product'
+  },{
+    name:'qty',
+    message:'How many will you like to add to inventory'
+  }]).then(function(answers){
+    newProduct.product_name = answers.name;
+    newProduct.department_name = answers.dep;
+    newProduct.price = answers.price;
+    newProduct.stock_quantity = answers.qty;
+    connection.query(
+      'insert into products set ?', newProduct,
+      function(error, results, fields){
+        if (error) throw error;
+        console.log(results);
+        manager();
+      }
+    )
+  });
+}
+
+function exitProgram(){
+  connection.end(function(err) {
+    if (err) throw error;
+    // The connection is terminated now
+    console.log("Connection Terminated");
+  });
+}
 
 // ########################
 // Place A Order Logic
@@ -321,7 +350,7 @@ function availability (id, qty) {
       } else {
         if(instock === 0 ){
           console.log("Sorry we are out of stock");
-        }else {
+        } else {
 
           var item = results[0].product_name;
           console.log(
