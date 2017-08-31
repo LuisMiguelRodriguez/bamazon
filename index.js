@@ -47,20 +47,19 @@ function supervisor(){
 
 }
 
-function viewProductSales(){
+function viewProductSales() {
   var salesQuery = "select department_id,departments.department_name , over_head_costs, SUM(product_sales) as total_profit from departments join products on departments.department_id = products.department_name group by departments.department_name;";
-  connection.query(salesQuery, function(error, results , field){
-    if(error) throw error;
+  connection.query(salesQuery, function(error, results, field) {
+    if (error) throw error;
     var t = new Table({
-      borderStyle:2
+      borderStyle: 2
     });
 
-    t.push(["Item ID".blue, "Product".blue, "Price".blue, "Qty in Stock".blue],
-    ["---------","----------","---------","---------"]);
+    t.push(["Department ID".blue, "Department Name".blue, "Over Head Costs".blue, "Total Profit".blue], ["---------", "----------", "---------", "---------"]);
 
-    for(var i = 0; i < results.length; i++){
+    for (var i = 0; i < results.length; i++) {
       t.push(
-        [results[i].department_id, results[i].department_name, results[i].over_head_costs,results[i].total_profit]
+        [results[i].department_id, results[i].department_name, results[i].over_head_costs, results[i].total_profit]
       )
     }
 
