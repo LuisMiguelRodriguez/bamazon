@@ -15,6 +15,8 @@ dbConnect();
 // mainMenu();
 
 manager();
+
+
 //
 // var  app = process.argv[2];
 //
@@ -82,7 +84,7 @@ function mainMenu(){
 }
 
 // ########################
-//supervisor Logic
+//    supervisor Logic
 // ########################
 function supervisor(){
 
@@ -107,6 +109,7 @@ function supervisor(){
 }
 
 function viewProductSales() {
+
   var salesQuery = "select department_id,departments.department_name , over_head_costs, SUM(product_sales) as total_profit from departments join products on departments.department_id = products.department_name group by departments.department_name;";
   connection.query(salesQuery, function(error, results, field) {
     if (error) throw error;
@@ -155,41 +158,43 @@ function createNewDepartment (){
 }
 
 // ########################
-// Manager Logic
+//      Manager Logic
 // ########################
 function manager (){
-  console.log(
-    "\n\rMenu Options:\n\r"+
-    "1 View Products for Sale\n\r" +
-    "2 View Low Inventory\n\r"+
-    "3 Add Inventory\n\r" +
-    "4 Add New Product\n\r" +
-    "5 Supervisor\n\r" +
-    "6 Exit program"
-  );
+  // console.log(
+  //   "\n\rMenu Options:\n\r"+
+  //   "1 View Products for Sale\n\r" +
+  //   "2 View Low Inventory\n\r"+
+  //   "3 Add Inventory\n\r" +
+  //   "4 Add New Product\n\r" +
+  //   "5 Supervisor\n\r" +
+  //   "6 Exit program"
+  // );
 
   inquirer.prompt([{
     name:"app",
-    message: "Please enter the number associated with the options"
+    type:"rawlist",
+    message: "Please enter the number associated with the options",
+    choices: ["View Products for Sale", "View Low Inventory", "Add Inventory", "Add New Product", "Supervisor", "Exit program" ]
   }]).then(function(answers){
 
     switch(answers.app){
-      case "1":
+      case "View Products for Sale":
         viewProductsForSale();
         break;
-      case "2":
+      case "View Low Inventory":
         viewLowInventory();
         break;
-      case "3":
+      case "Add Inventory":
         addInventory();
         break;
-      case "4":
+      case "Add New Product":
         addNewProduct();
         break;
-      case "5":
+      case "Supervisor":
         supervisor();
         break;
-      case "6":
+      case "Exit program":
         exitProgram();
         break;
     }
@@ -334,11 +339,12 @@ function exitProgram(){
 }
 
 // ########################
-// Place A Order Logic
+//  Place A Order Logic
 // ########################
 
 function placeAOrder (){
-  connection.query(
+
+    connection.query(
     'select * from products',
     function(error, results, fields){
     if(error) throw error;
@@ -438,9 +444,9 @@ function placeOrder(newQty, id , total){
 
 }
 
-// ########################
+// ##########################
 //Database connection Logic
-// ########################
+// ##########################
 
 function dbConnect () {
   connection.connect(function(err) {
@@ -449,7 +455,7 @@ function dbConnect () {
       return;
     }
 
-    console.log('connected as id ' + connection.threadId);
+    // console.log('connected as id ' + connection.threadId);
 
   });
 }
