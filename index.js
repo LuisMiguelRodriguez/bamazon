@@ -2,6 +2,7 @@ var inquirer = require('inquirer');
 var mysql = require('mysql');
 var Table = require("terminal-table");
 var color = require("colors");
+var term = require('terminal-kit').terminal;
 
 var connection = mysql.createConnection({
   host     : 'sql3.freesqldatabase.com',
@@ -11,15 +12,73 @@ var connection = mysql.createConnection({
 });
 
 dbConnect();
+// mainMenu();
 
-var  app = process.argv[2];
+manager();
+//
+// var  app = process.argv[2];
+//
+// switch(app){
+//   case "order":
+//     placeAOrder();
+//     break;
+//   case "manage":
+//     manager();
+//     break;
+//   case "supervisor":
+//     supervisor();
+//     break;
+//   default:
+//     manager();
+// }
 
-if(app == "order"){
-  placeAOrder();
-}else if (app == "manage"){
-  manager();
-}else if (app == "supervisor"){
-  supervisor();
+function mainMenu(){
+
+    console.log("hello");
+    var options = {
+  	y: 1 ,	// the menu will be on the top of the terminal
+  	style: term.inverse ,
+  	selectedStyle: term.dim.blue.bgGreen,
+    continueOnSubmit: false
+  } ;
+  var items = [ 'Place Order' , 'Products For Sale' , 'Low Inventory' , 'Add Inventory' , 'Add New Product' , 'Supervisor' ];
+
+  // term.clear() ;
+  // term.grabInput( { mouse: 'button' } ) ;
+  // term.on( 'mouse' , function( name , data ) {
+  //   console.log( "'mouse' event:" , name , data ) ;
+  //   }
+  // ) ;
+
+  term.singleLineMenu( items , options , function( error , response ) {
+    if (error) throw error;
+    console.log("response from term " + response.selectedIndex);
+      switch(response.selectedIndex.toString()){
+        case "0":
+          placeAOrder();
+          break;
+        case "1":
+          viewProductsForSale();
+          break;
+        case "2":
+          viewLowInventory();
+          break;
+        case "3":
+          addInventory();
+          break;
+        case "4":
+          addNewProduct();
+          break;
+        case "5":
+          supervisor();
+          break;
+        case "6":
+          exitProgram();
+          break;
+        default:
+          manager();
+      }
+    });
 }
 
 // ########################
@@ -158,10 +217,11 @@ function viewProductsForSale(){
       }
 
       console.log("" + t);
-
-    manager();
-
-  });
+      //
+      // mainMenu();
+      manager();
+    }
+  );
 }
 
 function viewLowInventory(){
@@ -186,6 +246,7 @@ function viewLowInventory(){
       }
 
       console.log("" + t);
+      // mainMenu();
       manager();
     }
   );
@@ -221,6 +282,7 @@ function addInventory(){
               function(error, results, fields){
                 if(error) throw error;
 
+                // mainMenu();
                 manager();
 
               }
@@ -256,6 +318,7 @@ function addNewProduct(){
       function(error, results, fields){
         if (error) throw error;
         console.log(results);
+        // mainMenu();
         manager();
       }
     )
@@ -274,11 +337,7 @@ function exitProgram(){
 // Place A Order Logic
 // ########################
 
-function placeAOrder(){
-  displayData();
-}
-
-function displayData (){
+function placeAOrder (){
   connection.query(
     'select * from products',
     function(error, results, fields){
@@ -348,8 +407,11 @@ function availability (id, qty) {
         placeOrder(newQty,id, totalSales);
 
       } else {
+
         if(instock === 0 ){
           console.log("Sorry we are out of stock");
+          // mainMenu();
+          manager();
         } else {
 
           var item = results[0].product_name;
@@ -357,6 +419,8 @@ function availability (id, qty) {
             "Sorry you currently requested " + qty + " " + item +
             "'s and we currently only have " + instock + " in stock"
           );
+          manager();
+          // mainMenu();
         }
       }
   });
@@ -366,8 +430,12 @@ function placeOrder(newQty, id , total){
   connection.query(
     'update products set stock_quantity =' + newQty + ", product_sales= "+ total +" where item_id=" + id,
     function(error, results, fields){
+      if (error) throw error;
       console.log( results);
+      // mainMenu();
+      manager();
     });
+
 }
 
 // ########################
@@ -382,5 +450,6 @@ function dbConnect () {
     }
 
     console.log('connected as id ' + connection.threadId);
+
   });
 }
